@@ -18,8 +18,8 @@ Masih dengan Ini Karya Kita, sang CEO ingin melakukan tes keamanan pada folder s
 
 ### Langkah Pengerjaan :
 - Download dan extract `folder rahasia`
-- Masuk direktori `pesam` ( hasil dari ekstrak `folder rahasia`
-- buat script `pastibisa.c` menggunakan editor nano denga command `nano pastibisa.c`
+- Masuk direktori `pesam` ( hasil dari ekstrak `folder rahasia` )
+- buat script `pastibisa.c` menggunakan editor nano dengan command `nano pastibisa.c`
 - Isi script `pastibisa.c` 
   ```
   #define FUSE_USE_VERSION 31
@@ -178,7 +178,7 @@ Masih dengan Ini Karya Kita, sang CEO ingin melakukan tes keamanan pada folder s
 - Buat direktori mount menggunakan command `mkdir /tmp/[direktori tujuan]` disini saya menggunakan dir `tmp` karena bersifat sementara
 - Run fuse menggunakan `./pastibisa /tmp/[direktori tujuan]`
 - Untuk membaca file enkripsi gunakan command `cat [file.txt]`
-- Untuk membaca file dekripsi gunakan command `cat decode_rot13_enkripsi_rot13.txt
+- Untuk membaca file dekripsi gunakan command `cat decode_rot13_enkripsi_rot13.txt`
 - Unmount menggunakan `sudo umount /tmp/[dir tujuan]`
 
 ### Penjelasan Script
