@@ -21,7 +21,7 @@ Masih dengan Ini Karya Kita, sang CEO ingin melakukan tes keamanan pada folder s
 - Masuk direktori `pesam` ( hasil dari ekstrak `folder rahasia` )
 - buat script `pastibisa.c` menggunakan editor nano dengan command `nano pastibisa.c`
 - Isi script `pastibisa.c` 
-  ```
+  ```c
   #define FUSE_USE_VERSION 31
 
   #include <fuse.h>
@@ -184,7 +184,7 @@ Masih dengan Ini Karya Kita, sang CEO ingin melakukan tes keamanan pada folder s
 ### Penjelasan Script
 
 1. Header dan deklarasi
-```
+```c
 #define FUSE_USE_VERSION 31
 
 #include <fuse.h>
@@ -198,7 +198,7 @@ Masih dengan Ini Karya Kita, sang CEO ingin melakukan tes keamanan pada folder s
    - base64_decode
      
      Mendecode string base64 menjadi string asli
-     ```
+     ```c
      // decode base64
      char *base64_decode(const char *input) {
        static const char base64_table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -227,7 +227,7 @@ Masih dengan Ini Karya Kita, sang CEO ingin melakukan tes keamanan pada folder s
 - ro13_decode
 
   Mendecode string yang di enkrip menggunakan rot13
-  ```
+  ```c
   // decode rot13
   char *rot13_decode(const char *input) {
     char *decoded = strdup(input);
@@ -246,7 +246,7 @@ Masih dengan Ini Karya Kita, sang CEO ingin melakukan tes keamanan pada folder s
 - hex_decode
   
   Mendecode string hexadecimal menjadi string asli
-  ```
+  ```c
   // decode hex
   char *hex_decode(const char *input) {
     int len = strlen(input);
@@ -261,7 +261,7 @@ Masih dengan Ini Karya Kita, sang CEO ingin melakukan tes keamanan pada folder s
 - reverse_text
 
   Mereverse/membalik urutan huruf/karakter string
-  ```
+  ```c
   // rev
   char *reverse_text(const char *input) {
     int len = strlen(input);
@@ -275,7 +275,7 @@ Masih dengan Ini Karya Kita, sang CEO ingin melakukan tes keamanan pada folder s
   ```
 3. Implementasi FUSE
 - gettattr ( get attribute )
-  ```
+  ```c
   static int getattr(const char *path, struct stat *stbuf) {
     int res = 0;
     char prefix[10];
@@ -301,7 +301,7 @@ Masih dengan Ini Karya Kita, sang CEO ingin melakukan tes keamanan pada folder s
 - sens_open
 
   Membuka file dengan prefix yang sesuai
-  ```
+  ```c
   static int sens_open(const char *path, struct fuse_file_info *fi) {
     char prefix[10];
     char filename[256];
@@ -318,8 +318,8 @@ Masih dengan Ini Karya Kita, sang CEO ingin melakukan tes keamanan pada folder s
   ```
 - read
 
-  Membaca/ melihat isi file berdasarkan pathnya lalu mengembalikan is file/konten yang telah didecode
-  ```
+  Membaca / melihat isi file berdasarkan pathnya lalu mengembalikan is file/konten yang telah didecode
+  ```c
   static int read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
     size_t len;
     char prefix[10];
@@ -357,7 +357,7 @@ Masih dengan Ini Karya Kita, sang CEO ingin melakukan tes keamanan pada folder s
 4. Struct dan fungsi `main`
    - `fuse_operations oper` : mendefinisikan operasi filesystem
    - `main` : memanggil `fuse_main` dengan `oper` yang sudah didefinisikan
-     ```
+     ```c
      static struct fuse_operations oper = {
     	.getattr = getattr,
     	.open = sens_open,
@@ -368,9 +368,3 @@ Masih dengan Ini Karya Kita, sang CEO ingin melakukan tes keamanan pada folder s
     	return fuse_main(argc, argv, &oper, NULL);
      }
   ```
-     
-  
-
-  
-
-     
