@@ -948,3 +948,29 @@ Direktori report akan berisi seluruh relic yang sudah digabung melalui FUSE, dar
     writable = yes
     guest ok = no
 ```
+
+### Dokumentasi
+
+Listing
+
+![image](https://github.com/U5ESLESS/Sisop-4-2024-MH-IT07/assets/151041878/04ff249f-c05e-41e8-b6cc-3fa2befd9b86)
+
+Copy ke luar FUSE
+
+![image](https://github.com/U5ESLESS/Sisop-4-2024-MH-IT07/assets/151041878/020674a9-590b-47a2-9c06-19df8707da80)
+
+Copy ke dalam FUSE
+
+![image](https://github.com/U5ESLESS/Sisop-4-2024-MH-IT07/assets/151041878/f3315209-9f0a-456f-ad4c-132e6bffea77)
+
+Delete melalui FUSE
+
+![image](https://github.com/U5ESLESS/Sisop-4-2024-MH-IT07/assets/151041878/a869b883-cce5-4140-8e9b-a8637f1921aa)
+
+Samba
+
+![image](https://github.com/U5ESLESS/Sisop-4-2024-MH-IT07/assets/151041878/9d1ca757-7d41-478a-ae6f-39e8b6bd7183)
+
+
+kendala
+- tidak ada masalah pada code
