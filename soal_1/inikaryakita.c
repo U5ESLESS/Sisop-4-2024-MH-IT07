@@ -11,7 +11,7 @@
 #include <sys/stat.h>
 #include <wand/MagickWand.h>
 
-static const char *dirpath = "/path/to/gallery";
+static const char *dirpath = "/home/user/soal1/gallery";
 static const char *watermark = "inikaryakita.id";
 
 static int xmp_getattr(const char *path, struct stat *stbuf) {
