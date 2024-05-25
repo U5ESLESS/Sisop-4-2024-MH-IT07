@@ -1,6 +1,6 @@
 # Sisop-4-2024-MH-IT07
 Anggota Kelompok
-- Dzaky Faiq Fayyadhi (5027231047
+- Dzaky Faiq Fayyadhi (5027231047)
 
 - Randist Prawandha Putera (5027231069)
   
@@ -422,6 +422,8 @@ static void set_permissions(const char *path) {
     chmod(path, 0755);
 }
 ```
+
+
 
 Dari library fuse yang sudah ter-install dan terdefinisi, dapat dipanggil melalui main dengan menentukan daftar fungsi dan menambahkan permission lengkap di dalam main:
 
