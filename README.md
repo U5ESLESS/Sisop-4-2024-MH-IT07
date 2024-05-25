@@ -447,7 +447,7 @@ int main(int argc, char *argv[]) {
 }
 ```
 
-###Implementasi Fuse
+### Implementasi Fuse
 
 1. custom_getattr
 
