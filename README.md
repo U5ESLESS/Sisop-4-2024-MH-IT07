@@ -10,7 +10,7 @@ Anggota Kelompok
 ## Soal 1
 Dikerjakan Oleh Randist Prawandha Putera (5027231069)
 
-## Soal:
+# Soal:
 Kami diberi tugas oleh Adfi, yang merupakan seorang CEO dari agensi kreatif "Ini Karya Kita", untuk melakukan inovasi dalam manajemen proyek fotografi. Tujuan utamanya adalah meningkatkan daya tarik proyek fotografi yang disajikan kepada klien. Kami memiliki portofolio proyek fotografi yang telah disiapkan dan dapat diunduh dari situs web agensi di www.inikaryakita.id. Setelah diunduh, terdapat dua folder utama yaitu "gallery" dan "bahaya".
 
 Dalam folder "gallery", kami bertanggung jawab untuk menambahkan watermark pada setiap gambar dan memindahkannya ke dalam folder dengan prefix "wm". Sedangkan di folder "bahaya", tugas kami adalah mengubah permission pada file "script.sh" agar dapat dijalankan dan membuat program yang dapat membalik isi dari setiap file yang memiliki prefix "test".
