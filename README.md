@@ -1,6 +1,23 @@
 # Sisop-4-2024-MH-IT07
+Anggota Kelompok
+- Dzaky Faiq Fayyadhi (5027231047
+
+- Randist Prawandha Putera (5027231069)
+  
+- Radella Chesa Syaharani (5027231064)
+
+  
+## Soal 1
+Dikerjakan Oleh Randist Prawandha Putera (5027231069)
+
+
+
+
 
 ## Soal 2
+Dikerjakan Oleh Radella Chesa Syaharani (5027231064)
+
+
 Masih dengan Ini Karya Kita, sang CEO ingin melakukan tes keamanan pada folder sensitif Ini Karya Kita. Karena Teknologi Informasi merupakan departemen dengan salah satu fokus di Cyber Security, maka dia kembali meminta bantuan mahasiswa Teknologi Informasi angkatan 2023 untuk menguji dan mengatur keamanan pada folder sensitif tersebut. Untuk mendapatkan folder sensitif itu, mahasiswa IT 23 harus kembali mengunjungi website Ini Karya Kita pada www.inikaryakita.id/schedule . Silahkan isi semua formnya, tapi pada form subject isi dengan nama kelompok_SISOP24 , ex: IT01_SISOP24 . Lalu untuk form Masukkan Pesanmu, ketik “Mau Foldernya” . Tunggu hingga 1x24 jam, maka folder sensitif tersebut akan dikirimkan melalui email kalian. Apabila folder tidak dikirimkan ke email kalian, maka hubungi sang CEO untuk meminta bantuan.   
 - Pada folder "pesan" Adfi ingin meningkatkan kemampuan sistemnya dalam mengelola berkas-berkas teks dengan menggunakan fuse.
   
@@ -368,3 +385,364 @@ Masih dengan Ini Karya Kita, sang CEO ingin melakukan tes keamanan pada folder s
     	return fuse_main(argc, argv, &oper, NULL);
      }
   ```
+```
+## Soal 3
+Dikerjakan oleh: Dzaky Faiq Fayyadhi (5027231047)
+
+Di dalam soal 3 ini, kita disuruh untuk membuat sebuah FUSE untuk menggabungkan pecahan relic berharga tanpa menyentuh isi folder relic secara langsung agar tergabung dengan mudah.
+
+### Inisialisasi FUSE
+
+Untuk membangun sebuah FUSE yang cocok bagi kasus ini, dimulai dari menentukan beberapa library dan variabel penting:
+
+```c
+#define FUSE_USE_VERSION 26
+#include <fuse.h>
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <sys/stat.h>
+
+static const char *relics_path = "/home/kyfaiyya/soal3/relics";
+static const char *temp_path = "/tmp";
+#define CHUNK_SIZE 10240 // 10KB
+```
+
+Fungsi Helper
+
+set_permissions(const char *path): Mengatur izin direktori relics menjadi 0755. (agar dapat di read, write, dan execute)
+```c
+static void set_permissions(const char *path) {
+    // Set the directory permissions to 755
+    chmod(path, 0755);
+}
+```
+
+Dari library fuse yang sudah ter-install dan terdefinisi, dapat dipanggil melalui main dengan menentukan daftar fungsi dan menambahkan permission lengkap di dalam main:
+
+```c
+struct fuse_operations custom_oper = {
+    .getattr = custom_getattr,
+    .readdir = custom_readdir,
+    .open = custom_open,
+    .read = custom_read,
+    .write = custom_write,
+    .unlink = custom_unlink,
+    .create = custom_create,
+    .truncate = custom_truncate,
+    .release = custom_release,
+    .utimens = custom_utimens,
+};
+
+int main(int argc, char *argv[]) {
+    umask(0);
+    // Set permissions for the relics directory
+    set_permissions(relics_path);
+    return fuse_main(argc, argv, &custom_oper, NULL);
+}
+```
+
+###Implementasi Fuse
+
+1. custom_getattr
+
+```c
+static int custom_getattr(const char *path, struct stat *stbuf) {
+    memset(stbuf, 0, sizeof(struct stat));
+
+    if (strcmp(path, "/") == 0) {
+        stbuf->st_mode = S_IFDIR | 0755;
+        stbuf->st_nlink = 2;
+    } else {
+        stbuf->st_mode = S_IFREG | 0444;
+        stbuf->st_nlink = 1;
+        stbuf->st_size = 0;
+
+        char full_path[1000];
+        strcpy(full_path, temp_path);
+        strcat(full_path, path);
+
+        FILE *file = fopen(full_path, "r");
+        if (file) {
+            fseek(file, 0, SEEK_END);
+            stbuf->st_size = ftell(file);
+            fclose(file);
+        }
+    }
+    return 0;
+}
+```
+Mengambil atribut file (metadata).
+
+Jika path adalah root (/), mode diset sebagai direktori (S_IFDIR) dengan izin 0755 dan jumlah link 2.
+Untuk path lain, diasumsikan sebagai file dengan mode file reguler (S_IFREG) dan izin hanya baca (0444). Ukuran file dihitung dengan membuka file terkait di direktori sementara.
+
+2. custom_readdir
+
+```c
+static int custom_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi) {
+    (void) offset;
+    (void) fi;
+
+    if (strcmp(path, "/") != 0)
+        return -ENOENT;
+
+    filler(buf, ".", NULL, 0);
+    filler(buf, "..", NULL, 0);
+
+    DIR *dp;
+    struct dirent *de;
+    dp = opendir(relics_path);
+    if (dp == NULL)
+        return -errno;
+
+    char current_file[256] = "";
+    char combined_file_path[1024];
+    FILE *combined_file = NULL;
+
+    while ((de = readdir(dp)) != NULL) {
+        if (de->d_type != DT_REG)
+            continue;
+
+        char *dot = strrchr(de->d_name, '.');
+        if (!dot || dot == de->d_name)
+            continue;
+
+        int part_number = atoi(dot + 1);
+        if (part_number == 0) {
+            if (combined_file != NULL) {
+                fclose(combined_file);
+                filler(buf, current_file, NULL, 0);
+            }
+
+            snprintf(current_file, sizeof(current_file), "%.*s", (int)(dot - de->d_name), de->d_name);
+            snprintf(combined_file_path, sizeof(combined_file_path), "%s/%s", temp_path, current_file);
+            combined_file = fopen(combined_file_path, "w");
+            if (!combined_file)
+                return -errno;
+        }
+
+        char part_path[1024];
+        snprintf(part_path, sizeof(part_path), "%s/%s", relics_path, de->d_name);
+        FILE *part_file = fopen(part_path, "r");
+        if (!part_file)
+            continue;
+
+        char buffer[CHUNK_SIZE];
+        size_t bytes;
+        while ((bytes = fread(buffer, 1, sizeof(buffer), part_file)) > 0) {
+            fwrite(buffer, 1, bytes, combined_file);
+        }
+        fclose(part_file);
+    }
+
+    if (combined_file != NULL) {
+        fclose(combined_file);
+        filler(buf, current_file, NULL, 0);
+    }
+
+    closedir(dp);
+    return 0;
+}
+```
+
+Menangani listing direktori.
+
+Menambahkan entri direktori saat ini (.) dan induk (..).
+Membuka direktori relics, membaca entri, dan menggabungkan potongan file menjadi file sementara di direktori /tmp.
+
+3. custom_open
+
+```c
+static int custom_open(const char *path, struct fuse_file_info *fi) {
+    return 0;
+}
+```
+Membuka file. Fungsi ini tidak melakukan operasi khusus dan selalu mengembalikan sukses.
+
+4. custom_read
+
+```c
+static int custom_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
+    char full_path[1000];
+    strcpy(full_path, temp_path);
+    strcat(full_path, path);
+
+    int fd = open(full_path, O_RDONLY);
+    if (fd == -1)
+        return -errno;
+
+    int res = pread(fd, buf, size, offset);
+    if (res == -1)
+        res = -errno;
+
+    close(fd);
+    return res;
+}
+```
+   
+Membaca data dari file. Membuka file terkait di direktori /tmp dan membaca byte yang diminta.
+
+5. custom_write
+
+```c
+static int custom_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
+    char full_path[1000];
+    strcpy(full_path, temp_path);
+    strcat(full_path, path);
+
+    // Write data to temp file
+    int fd = open(full_path, O_WRONLY | O_CREAT, 0666);
+    if (fd == -1)
+        return -errno;
+
+    int res = pwrite(fd, buf, size, offset);
+    if (res == -1) {
+        close(fd);
+        return -errno;
+    }
+    close(fd);
+
+    // Split the file into chunks and save them to relics directory
+    char relic_path[1000];
+    FILE *temp_file = fopen(full_path, "r");
+    if (!temp_file)
+        return -errno;
+
+    char buffer[CHUNK_SIZE];
+    size_t bytes;
+    int part = 0;
+
+    while ((bytes = fread(buffer, 1, CHUNK_SIZE, temp_file)) > 0) {
+        snprintf(relic_path, sizeof(relic_path), "%s%s.%03d", relics_path, path, part++);
+        FILE *relic_file = fopen(relic_path, "w");
+        if (!relic_file) {
+            fclose(temp_file);
+            return -errno;
+        }
+        fwrite(buffer, 1, bytes, relic_file);
+        fclose(relic_file);
+    }
+
+    fclose(temp_file);
+    return res;
+}
+```
+
+Menulis data ke file. Menulis data ke file sementara di /tmp, kemudian membagi file menjadi potongan-potongan dan menyimpannya ke direktori relics. Setiap potongan dinamai dengan nomor urut.
+
+6. custom_unlink
+
+```c
+static int custom_unlink(const char *path) {
+    char full_path[1000];
+    strcpy(full_path, relics_path);
+    strcat(full_path, path);
+
+    char *dot = strrchr(full_path, '.');
+    if (!dot || dot == full_path) {
+        return -errno;
+    }
+
+    char base_name[1000];
+    snprintf(base_name, dot - full_path + 1, "%s", full_path);
+    strcat(base_name, ".*");
+
+    // Construct command to delete all parts
+    char command[1100];
+    snprintf(command, sizeof(command), "rm %s", base_name);
+
+    // Execute the command
+    int res = system(command);
+    if (res == -1) {
+        return -errno;
+    }
+
+    return 0;
+}
+```
+
+Menghapus file. Membuat perintah untuk menghapus semua potongan file dari direktori relics dan mengeksekusinya.	 
+
+7. custom_create
+
+```c
+static int custom_create(const char *path, mode_t mode, struct fuse_file_info *fi) {
+    char full_path[1000];
+    snprintf(full_path, sizeof(full_path), "%s%s", temp_path, path);
+
+    int fd = open(full_path, fi->flags, mode);
+    if (fd == -1) {
+        return -errno;
+    }
+
+    close(fd);
+    return 0;
+}
+```
+Membuat file baru di direktori sementara.
+
+8. custom_truncate
+
+```c
+static int custom_truncate(const char *path, off_t size) {
+    char full_path[1000];
+    snprintf(full_path, sizeof(full_path), "%s%s", temp_path, path);
+
+    int res = truncate(full_path, size);
+    if (res == -1) {
+        return -errno;
+    }
+
+    return 0;
+}
+```
+
+Mengatur ukuran file ke ukuran tertentu. Beroperasi pada file di direktori sementara.
+
+9. custom_release
+
+```c
+static int custom_release(const char *path, struct fuse_file_info *fi) {
+    // No special operations needed here
+    return 0;
+}
+```
+Menutup file. Fungsi ini tidak melakukan operasi khusus dan selalu mengembalikan sukses.
+
+
+10. custom_utimens
+
+```
+    static int custom_utimens(const char *path, const struct timespec ts[2]) {
+    char full_path[1000];
+    snprintf(full_path, sizeof(full_path), "%s%s", temp_path, path);
+
+    int res = utimensat(0, full_path, ts, AT_SYMLINK_NOFOLLOW);
+    if (res == -1)
+        return -errno;
+
+    return 0;
+}
+```
+Memperbarui waktu akses dan modifikasi file di direktori sementara.
+
+
+### Samba Server
+
+Direktori report akan berisi seluruh relic yang sudah digabung melalui FUSE, dari FUSE akan dicopy ke dalam report dengan command `cp <fuse>/* report` dan dapat dimulai sebuah Samba server untuk membagikan folder dengan cara menambahkan contoh konfigurasi sebagai berikut:
+
+```conf
+[holaaa!]
+    comment = Archeology Relic Report
+    path = /home/kyfaiyya/soal3/report
+    read only = no
+    browsable = yes
+    writable = yes
+    guest ok = no
+```
